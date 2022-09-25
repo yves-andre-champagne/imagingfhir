@@ -1,0 +1,29 @@
+spring:
+  profiles:
+   active: ${SPRING_PROFILES:httpbasicauth}
+qidors:
+  baseUrl: ${QIDORS_BASE_URL}
+  #http://192.168.3.133:8042/dicom-web/studies
+  #http://192.168.3.133:8042/dicom-web/studies
+  #https://192.168.3.132:8843/realms/dcm4che/protocol/openid-connect/token
+  #${QIDORS_BASE_URL}
+ssl:
+  trustAllCerts: true
+debug: true
+
+---
+spring.profiles: oidctokenauth
+oidc:
+  client:
+   id: ${OIDC_CLIENT_ID}
+   secret: ${OIDC_CLIENT_SECRET}
+  token:
+   endpoint: ${OIDC_TOKEN_ENDPOINT}
+
+---
+
+spring.profiles: httpbasicauth
+httpbasic:
+  auth:
+    username: ${BASIC_AUTH_USERNAME:alice}
+    password: ${BASIC_AUTH_PASSWORD:alicePassword}
