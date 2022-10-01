@@ -15,4 +15,9 @@ public class OidcTokenProperties
 	@Getter
 	@Setter
 	private String endpoint;
+
+	@Getter
+	@Setter
+	private int cacheSize = 50;
+
 }

@@ -35,7 +35,7 @@ public class HttpBasicAuthorization implements HttpAuthorization
 		}
 		catch (Exception e)
 		{
-			log.error("unable to process get token request", e);
+			log.error("unable to process get authorization request", e);
 			authorizationCredentials = new AuthorizationCredentials(AUTHORIZATION_TYPE, "",
 					AuthorizationCredentialsStatus.ERROR);
 		}

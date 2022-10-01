@@ -12,7 +12,7 @@ ssl:
 debug: true
 
 ---
-spring.profiles: oidctokenauth
+spring.config.activate.on-profile: oidctokenauth
 oidc:
   client:
    id: ${OIDC_CLIENT_ID}
@@ -22,8 +22,8 @@ oidc:
 
 ---
 
-spring.profiles: httpbasicauth
+spring.config.activate.on-profile: httpbasicauth
 httpbasic:
   auth:
-    username: ${BASIC_AUTH_USERNAME:alice}
-    password: ${BASIC_AUTH_PASSWORD:alicePassword}
+    username: ${BASIC_AUTH_USERNAME}
+    password: ${BASIC_AUTH_PASSWORD}

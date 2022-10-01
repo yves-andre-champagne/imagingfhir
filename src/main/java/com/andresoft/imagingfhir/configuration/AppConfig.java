@@ -2,14 +2,14 @@ package com.andresoft.imagingfhir.configuration;
 
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
+import com.andresoft.dicomweb.QidoRsClient;
 import com.andresoft.dicomweb.authorization.HttpAuthorization;
 import com.andresoft.dicomweb.authorization.basic.HttpBasicAuthorization;
-import com.andresoft.dicomweb.authorization.oidc.ClientCredentialsTokenRetriever;
-import com.andresoft.dicomweb.authorization.oidc.OidcTokenAuthorization;
+import com.andresoft.dicomweb.authorization.oidc.ClientCredentialsTokenProvider;
+import com.andresoft.dicomweb.authorization.oidc.TokenAuthorization;
 import com.andresoft.imagingfhir.provider.ImagingStudyResourceProvider;
 import com.andresoft.imagingfhir.server.ImagingStudyServer;
 import com.andresoft.imagingfhir.service.ImagingStudyService;
@@ -18,7 +18,6 @@ import com.andresoft.imagingfhir.service.impl.ImagingStudyServiceImpl;
 import ca.uhn.fhir.context.FhirContext;
 
 @Configuration
-@ComponentScan(basePackages = "com.andresoft")
 public class AppConfig
 {
 
@@ -50,7 +49,7 @@ public class AppConfig
 	@Profile("oidctokenauth")
 	HttpAuthorization oidcHttpAuthorization()
 	{
-		return new OidcTokenAuthorization();
+		return new TokenAuthorization();
 	}
 
 	@Bean
@@ -62,9 +61,15 @@ public class AppConfig
 
 	@Bean
 	@Profile("oidctokenauth")
-	ClientCredentialsTokenRetriever clientCredentialsTokenRetriever()
+	ClientCredentialsTokenProvider clientCredentialsTokenProvider()
 	{
-		return new ClientCredentialsTokenRetriever();
+		return new ClientCredentialsTokenProvider();
+	}
+
+	@Bean
+	QidoRsClient qidoRsClient()
+	{
+		return new QidoRsClient();
 	}
 
 	@SuppressWarnings("rawtypes")

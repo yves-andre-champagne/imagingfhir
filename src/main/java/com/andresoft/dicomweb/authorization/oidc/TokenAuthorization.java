@@ -17,7 +17,7 @@ import com.nimbusds.oauth2.sdk.token.AccessToken;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class OidcTokenAuthorization implements HttpAuthorization
+public class TokenAuthorization implements HttpAuthorization
 {
 	private static String AUTHORIZATION_TYPE = "Bearer";
 
@@ -25,7 +25,7 @@ public class OidcTokenAuthorization implements HttpAuthorization
 	private OidcClientProperties oidcClientProperties;
 
 	@Autowired
-	private ClientCredentialsTokenRetriever tokenRetriever;
+	private ClientCredentialsTokenProvider tokenProvider;
 
 	@Override
 	public AuthorizationCredentials getAuthorizationCredentials()
@@ -33,7 +33,7 @@ public class OidcTokenAuthorization implements HttpAuthorization
 		AuthorizationCredentials authorizationCredentials = null;
 		try
 		{
-			var accessToken = getRequestAccessToken();
+			var accessToken = getAccessToken();
 			if (accessToken.isPresent())
 			{
 				authorizationCredentials = new AuthorizationCredentials(AUTHORIZATION_TYPE,
@@ -49,11 +49,11 @@ public class OidcTokenAuthorization implements HttpAuthorization
 		return authorizationCredentials;
 	}
 
-	private Optional<AccessToken> getRequestAccessToken() throws UnprocessableRequestException
+	private Optional<AccessToken> getAccessToken() throws UnprocessableRequestException
 	{
 		try
 		{
-			return tokenRetriever.getAccessToken(oidcClientProperties.getId(), oidcClientProperties.getSecret());
+			return tokenProvider.getAccessToken(oidcClientProperties.getId(), oidcClientProperties.getSecret());
 
 		}
 		catch (ParseException | URISyntaxException | IOException e)

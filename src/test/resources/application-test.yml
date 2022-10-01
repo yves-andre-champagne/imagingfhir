@@ -1,0 +1,22 @@
+qidors:
+  baseUrl: http://example.com/studies
+ssl:
+  trustAllCerts: true
+debug: true
+
+---
+spring.config.activate.on-profile: oidctokenauth
+oidc:
+  client:
+   id: id
+   secret: secret
+  token:
+   endpoint: http://auth/token
+
+---
+
+spring.config.activate.on-profile: httpbasicauth
+httpbasic:
+  auth:
+    username: user
+    password: password

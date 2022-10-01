@@ -7,6 +7,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
+import javax.annotation.PostConstruct;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 
@@ -15,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.andresoft.imagingfhir.configuration.OidcTokenProperties;
 import com.andresoft.imagingfhir.configuration.SSLProperties;
 import com.andresoft.util.SSLUtil;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.nimbusds.oauth2.sdk.AccessTokenResponse;
 import com.nimbusds.oauth2.sdk.AuthorizationGrant;
 import com.nimbusds.oauth2.sdk.ClientCredentialsGrant;
@@ -32,7 +35,7 @@ import com.nimbusds.oauth2.sdk.token.AccessToken;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ClientCredentialsTokenRetriever
+public class ClientCredentialsTokenProvider
 {
 
 	@Autowired
@@ -40,6 +43,15 @@ public class ClientCredentialsTokenRetriever
 
 	@Autowired
 	SSLProperties sslProperties;
+
+	Cache<String, HTTPRequest> httpRequestCache;
+
+	@PostConstruct
+	public void init()
+	{
+		httpRequestCache = CacheBuilder.newBuilder().maximumSize(oidcTokenProperties.getCacheSize()).build();
+
+	}
 
 	/**
 	 * 
@@ -57,22 +69,7 @@ public class ClientCredentialsTokenRetriever
 
 	{
 
-		// Construct the client credentials grant
-		AuthorizationGrant clientGrant = new ClientCredentialsGrant();
-
-		// The credentials to authenticate the client at the token endpoint
-		ClientID id = new ClientID(clientId);
-		Secret secret = new Secret(clientSecret);
-		ClientAuthentication clientAuth = new ClientSecretBasic(id, secret);
-
-		URI tokenEndpoint = new URI(oidcTokenProperties.getEndpoint());
-
-		// Make the token request
-		TokenRequest request = new TokenRequest(tokenEndpoint, clientAuth, clientGrant, null);
-
-		HTTPRequest httpRequest = request.toHTTPRequest();
-
-		disableSSLCertsCheckingIfRequired(httpRequest);
+		HTTPRequest httpRequest = getHTTPRequest(clientId, clientSecret);
 
 		TokenResponse response = TokenResponse.parse(httpRequest.send());
 
@@ -98,6 +95,38 @@ public class ClientCredentialsTokenRetriever
 
 		}
 
+	}
+
+	TokenRequest createTokenRequest(final URI uri, final ClientAuthentication clientAuth,
+			final AuthorizationGrant authzGrant)
+	{
+		return new TokenRequest(uri, clientAuth, authzGrant);
+	}
+
+	HTTPRequest getHTTPRequest(String clientId, String clientSecret) throws URISyntaxException
+	{
+		var httpRequest = httpRequestCache.getIfPresent(clientId);
+		if (httpRequest == null)
+		{
+
+			// Construct the client credentials grant
+			AuthorizationGrant clientGrant = new ClientCredentialsGrant();
+
+			// The credentials to authenticate the client at the token endpoint
+			ClientID id = new ClientID(clientId);
+			Secret secret = new Secret(clientSecret);
+			ClientAuthentication clientAuth = new ClientSecretBasic(id, secret);
+
+			URI tokenEndpoint = new URI(oidcTokenProperties.getEndpoint());
+
+			// create the token request
+			TokenRequest request = createTokenRequest(tokenEndpoint, clientAuth, clientGrant);
+
+			httpRequest = request.toHTTPRequest();
+			disableSSLCertsCheckingIfRequired(httpRequest);
+			httpRequestCache.put(clientId, httpRequest);
+		}
+		return httpRequest;
 	}
 
 	/**

@@ -91,6 +91,8 @@ public class ImagingStudyServiceImpl implements ImagingStudyService
 			case 200:
 				var patientStudyAttributesDatasets = processReponse(response, authorizationCredentials);
 
+				// System.out.println(response.getBody());
+
 				for (StudyAttributesDataset s : patientStudyAttributesDatasets)
 				{
 					var imagingStudy = toImagingStudy(s);
@@ -180,6 +182,8 @@ public class ImagingStudyServiceImpl implements ImagingStudyService
 		Response response = qidoClient.sendRequest(requestParameters, authorizationCredentials);
 
 		String body = response.getBody();
+
+		System.out.println(body);
 
 		StringReader reader = new StringReader(body);
 

@@ -20,14 +20,12 @@ import org.dcm4che3.data.ElementDictionary;
 import org.dcm4che3.data.Sequence;
 import org.dcm4che3.util.TagUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.andresoft.dicomweb.authorization.AuthorizationCredentials;
 import com.andresoft.imagingfhir.configuration.QidoClientProperties;
 import com.andresoft.imagingfhir.configuration.SSLProperties;
 import com.andresoft.util.SSLUtil;
 
-@Component
 public class QidoRsClient
 {
 
@@ -44,24 +42,8 @@ public class QidoRsClient
 	@PostConstruct
 	public void init()
 	{
+		httpClient = buildHttpClient();
 
-		if (sslProperties.isTrustAllCerts())
-		{
-			Optional<SSLContext> sslContext = SSLUtil.getTrustAllCertsSSLContext();
-
-			if (sslContext.isPresent())
-			{
-				httpClient = HttpClient.newBuilder().sslContext(sslContext.get()).build();
-			}
-			else
-			{
-				httpClient = HttpClient.newBuilder().build();
-			}
-		}
-		else
-		{
-			httpClient = HttpClient.newBuilder().build();
-		}
 	}
 
 	public Response sendRequest(RequestParameters requestParameters, AuthorizationCredentials authorizationCredentials)
@@ -176,6 +158,31 @@ public class QidoRsClient
 
 		return new Response(httpResponse.statusCode(), httpResponse.body());
 
+	}
+
+	HttpClient buildHttpClient()
+	{
+
+		HttpClient httpClient;
+		if (sslProperties.isTrustAllCerts())
+		{
+			Optional<SSLContext> sslContext = SSLUtil.getTrustAllCertsSSLContext();
+
+			if (sslContext.isPresent())
+			{
+				httpClient = HttpClient.newBuilder().sslContext(sslContext.get()).build();
+			}
+			else
+			{
+				httpClient = HttpClient.newBuilder().build();
+			}
+		}
+		else
+		{
+			httpClient = HttpClient.newBuilder().build();
+		}
+
+		return httpClient;
 	}
 
 	private void setSequenceQueryAttrs(Attributes queryAttrs, String queryUrl, Sequence sequence, String seqKeyWork)
