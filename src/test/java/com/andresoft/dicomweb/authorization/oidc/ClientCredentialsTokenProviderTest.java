@@ -38,6 +38,8 @@ public class ClientCredentialsTokenProviderTest
 	void testGetAccessToken() throws IOException, ParseException, URISyntaxException
 	{
 
+		tokenProvider.init();
+
 		HTTPRequest mockHttpRequest = mock(HTTPRequest.class);
 
 		TokenRequest mockTokenRequest = mock(TokenRequest.class);
@@ -58,9 +60,12 @@ public class ClientCredentialsTokenProviderTest
 
 	}
 
-	// @Test
+	@Test
 	void testGetAccessTokenFailure() throws IOException, ParseException, URISyntaxException
 	{
+
+		tokenProvider.init();
+
 		HTTPRequest mockHttpRequest = mock(HTTPRequest.class);
 
 		TokenRequest mockTokenRequest = mock(TokenRequest.class);
