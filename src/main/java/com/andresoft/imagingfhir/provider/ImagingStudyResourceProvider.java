@@ -24,7 +24,7 @@ public class ImagingStudyResourceProvider implements IResourceProvider
 {
 
 	@Autowired
-	ImagingStudyService imagingStudyService;
+	private ImagingStudyService imagingStudyService;
 
 	@Override
 	public Class<ImagingStudy> getResourceType()

@@ -9,6 +9,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,20 +35,28 @@ public class ClientCredentialsTokenProviderTest
 	@SpyBean
 	ClientCredentialsTokenProvider tokenProvider;
 
-	@Test
-	void testGetAccessToken() throws IOException, ParseException, URISyntaxException
-	{
+	HTTPRequest mockHttpRequest;
 
+	TokenRequest mockTokenRequest;
+
+	@BeforeEach
+	void setup()
+	{
 		tokenProvider.init();
 
-		HTTPRequest mockHttpRequest = mock(HTTPRequest.class);
+		mockHttpRequest = mock(HTTPRequest.class);
 
-		TokenRequest mockTokenRequest = mock(TokenRequest.class);
+		mockTokenRequest = mock(TokenRequest.class);
 
 		Mockito.doReturn(mockTokenRequest).when(tokenProvider).createTokenRequest(any(URI.class),
 				any(ClientAuthentication.class), any(AuthorizationGrant.class));
 
 		Mockito.when(mockTokenRequest.toHTTPRequest()).thenReturn(mockHttpRequest);
+	}
+
+	@Test
+	void testGetAccessToken() throws IOException, ParseException, URISyntaxException
+	{
 
 		HTTPResponse response = new HTTPResponse(200);
 		response.setEntityContentType(ContentType.APPLICATION_JSON);
@@ -63,17 +72,6 @@ public class ClientCredentialsTokenProviderTest
 	@Test
 	void testGetAccessTokenFailure() throws IOException, ParseException, URISyntaxException
 	{
-
-		tokenProvider.init();
-
-		HTTPRequest mockHttpRequest = mock(HTTPRequest.class);
-
-		TokenRequest mockTokenRequest = mock(TokenRequest.class);
-
-		Mockito.doReturn(mockTokenRequest).when(tokenProvider).createTokenRequest(any(URI.class),
-				any(ClientAuthentication.class), any(AuthorizationGrant.class));
-
-		Mockito.when(mockTokenRequest.toHTTPRequest()).thenReturn(mockHttpRequest);
 
 		HTTPResponse response = new HTTPResponse(401);
 		response.setEntityContentType(ContentType.APPLICATION_JSON);

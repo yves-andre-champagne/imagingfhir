@@ -1,11 +1,14 @@
 package com.andresoft.imagingfhir.service.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -39,6 +42,8 @@ public class ImagingStudyServiceImplTest
 	void testFindByPatientId() throws Exception
 	{
 
+		var patientId = "1450727";
+
 		//@formatter:off
 		var studyFileUri = Paths.get(getClass()
 					   .getClassLoader()
@@ -53,9 +58,9 @@ public class ImagingStudyServiceImplTest
 		var instancesFileUri = Paths.get(getClass()
 				   .getClassLoader()
 	               .getResource("dicomweb/instances.json")
-	               .toURI());
-		
+	               .toURI());	
 		//@formatter:on
+
 		var studyJson = new String(Files.readAllBytes(studyFileUri));
 		var seriesJson = new String(Files.readAllBytes(seriesFileUri));
 		var instancesJson = new String(Files.readAllBytes(instancesFileUri));
@@ -80,13 +85,24 @@ public class ImagingStudyServiceImplTest
 				{
 					response = new Response(200, instancesJson);
 				}
-
 				return response;
 			}
 		}).when(qidoRsClient).sendRequest(any(RequestParameters.class), any(AuthorizationCredentials.class));
 
-		var imagingStudy = imagingStudyService.findByPatientId("1450727");
-		assertNotNull(imagingStudy);
-	}
+		var imagingStudies = imagingStudyService.findByPatientId(patientId);
+		assertNotNull(imagingStudies);
+		assertEquals(imagingStudies.size(), 1);
 
+		var imagingStudy = imagingStudies.get(0);
+
+		var subject = imagingStudy.getSubject();
+		assertNotNull(subject);
+
+		var patientResource = subject.getResource();
+		assertTrue(patientResource instanceof Patient);
+
+		var patientIdentifier = ((Patient) patientResource).getIdentifierFirstRep();
+		assertNotNull(patientIdentifier);
+		assertEquals(patientIdentifier.getId(), patientId);
+	}
 }
