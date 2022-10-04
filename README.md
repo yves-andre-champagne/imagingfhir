@@ -1,4 +1,4 @@
-# A HAPI-FHIR ImagingStudy Server Facade For A DicomWeb Server
+# A SpringBoot Based HAPI-FHIR ImagingStudy Server Facade
  
  This project allow accessing the metadata content of a DicomWeb server as FHIR ImagingStudy.
  
